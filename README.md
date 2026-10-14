@@ -33,7 +33,7 @@ python3 tool/generate_kanji_data.py joyo.wiki
 
 ## ライセンス
 
-書き順データ（`assets/kanjivg/`）は [KanjiVG](https://kanjivg.tagaini.net) のものです。
-KanjiVG © Ulrich Apel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
+- プログラム（`assets/kanjivg/` 以外）: [MIT License](LICENSE) © kazweda
+- 書き順データ（`assets/kanjivg/`）: [KanjiVG](https://kanjivg.tagaini.net) © Ulrich Apel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
 
 学年別の漢字は学年別漢字配当表（2020 年度施行）、読みは常用漢字表（文化庁）によります。
