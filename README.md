@@ -10,6 +10,8 @@
 
 公開ページ: https://kazweda.github.io/kanji-app/
 
+<img src="docs/qr.svg" alt="公開ページの QR コード" width="160">
+
 ## 動かし方
 
 ```sh
