@@ -19,6 +19,14 @@ flutter pub get
 flutter run -d chrome
 ```
 
+## 開発の流れ
+
+`main` ブランチは保護されていて、直接 push できません。
+
+1. ブランチを作って変更を push し、プルリクエストを作る
+2. CI（フォーマット、`flutter analyze`、`flutter test`）が通ったらマージする
+3. `main` にマージされると、GitHub Pages に自動で公開される
+
 ## 漢字データの作り直し
 
 学年ごとの漢字と読み（`lib/src/kanji_data.dart`）は、常用漢字表の音訓から生成しています。
