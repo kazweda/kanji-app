@@ -1,17 +1,25 @@
-# kanji_app
+# kanji-app
 
-漢字のウェブアプリ
+漢字の書き順を 1 画ずつ確認しながら練習できる Flutter Web アプリです。
 
-## Getting Started
+- 小学 1 年生の漢字 10 字（一 山 川 日 月 木 水 火 右 学）を順番に練習
+- 「次の画」で 1 画ずつ、筆の動きをアニメーションで表示（いまの画は赤）
+- 自動再生、前の画に戻る、最初から、お手本のうすい表示の切り替え
+- キーボード操作: → / Space で次の画、← で前の画
 
-This project is a starting point for a Flutter application.
+## 動かし方
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter pub get
+flutter run -d chrome
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 漢字を追加するには
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. [KanjiVG](https://github.com/KanjiVG/kanjivg/tree/master/kanji) から、その漢字のコードポイント（5 桁の 16 進数）の SVG（例: 右 → `053f3.svg`）を `assets/kanjivg/` に入れる
+2. `lib/src/kanji_data.dart` の `kanjiList` に追加する
+
+## ライセンス
+
+書き順データ（`assets/kanjivg/`）は [KanjiVG](https://kanjivg.tagaini.net) のものです。
+KanjiVG © Ulrich Apel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
