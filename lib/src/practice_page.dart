@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,9 +7,15 @@ import 'kanji_data.dart';
 import 'kanjivg.dart';
 import 'stroke_painter.dart';
 
+/// 1 回の練習で出す問題の数。
+const questionsPerRound = 10;
+
 /// 書き順を 1 画ずつ進めながら練習する画面。
+/// [kanjiSet] の中からランダムに [questionsPerRound] 問を出す。
 class PracticePage extends StatefulWidget {
-  const PracticePage({super.key});
+  const PracticePage({super.key, required this.kanjiSet});
+
+  final KanjiSet kanjiSet;
 
   @override
   State<PracticePage> createState() => _PracticePageState();
@@ -15,9 +23,8 @@ class PracticePage extends StatefulWidget {
 
 class _PracticePageState extends State<PracticePage>
     with SingleTickerProviderStateMixin {
-  late final Future<List<KanjiStrokes>> _strokes = Future.wait([
-    for (final e in kanjiList) KanjiStrokes.load(e.kanji),
-  ]);
+  late List<KanjiEntry> _questions;
+  late Future<List<KanjiStrokes>> _strokes;
 
   late final AnimationController _draw = AnimationController(
     vsync: this,
@@ -34,7 +41,23 @@ class _PracticePageState extends State<PracticePage>
   // 現在の問題の画数。データ読み込み後に build で更新する。
   int _strokeCount = 0;
 
-  bool get _finished => _index >= kanjiList.length;
+  bool get _finished => _index >= _questions.length;
+
+  @override
+  void initState() {
+    super.initState();
+    _newRound();
+  }
+
+  /// 問題をランダムに選び直す。
+  void _newRound() {
+    _questions = ([
+      ...widget.kanjiSet.entries,
+    ]..shuffle(Random())).take(questionsPerRound).toList();
+    _strokes = Future.wait([
+      for (final e in _questions) KanjiStrokes.load(e.kanji),
+    ]);
+  }
 
   @override
   void dispose() {
@@ -100,16 +123,7 @@ class _PracticePageState extends State<PracticePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('漢字 書き順練習'),
-        actions: [
-          IconButton(
-            tooltip: 'このアプリについて',
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showAbout(context),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(widget.kanjiSet.title)),
       body: FutureBuilder(
         future: _strokes,
         builder: (context, snapshot) {
@@ -142,8 +156,8 @@ class _PracticePageState extends State<PracticePage>
 
   Widget _buildPractice(BuildContext context, KanjiStrokes data) {
     final theme = Theme.of(context);
-    final entry = kanjiList[_index];
-    final isLast = _index == kanjiList.length - 1;
+    final entry = _questions[_index];
+    final isLast = _index == _questions.length - 1;
     final complete = _step >= data.length;
 
     return Center(
@@ -155,27 +169,30 @@ class _PracticePageState extends State<PracticePage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '第 ${_index + 1} 問 / ${kanjiList.length}',
+                '第 ${_index + 1} 問 / ${_questions.length}',
                 style: theme.textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(value: (_index + 1) / kanjiList.length),
+              LinearProgressIndicator(value: (_index + 1) / _questions.length),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(entry.kanji, style: theme.textTheme.displaySmall),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(entry.reading, style: theme.textTheme.titleMedium),
-                      Text(
-                        '${data.length} 画',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
+                  // 読みが長い漢字もあるので、幅に収まらなければ折り返す。
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(entry.reading, style: theme.textTheme.titleMedium),
+                        Text(
+                          '${data.length} 画',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -282,36 +299,32 @@ class _PracticePageState extends State<PracticePage>
             Icon(Icons.celebration, size: 64, color: theme.colorScheme.primary),
             const SizedBox(height: 16),
             Text(
-              '${kanjiList.length} 問 おわり！',
+              '${_questions.length} 問 おわり！',
               style: theme.textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              kanjiList.map((e) => e.kanji).join(' '),
+              _questions.map((e) => e.kanji).join(' '),
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
-              onPressed: () => _goTo(0),
+              onPressed: () {
+                _newRound();
+                _goTo(0);
+              },
               icon: const Icon(Icons.replay),
-              label: const Text('もう一度'),
+              label: const Text('ちがう問題でもう一度'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.menu),
+              label: const Text('メニューへ'),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _showAbout(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: '漢字 書き順練習',
-      children: const [
-        Text(
-          '書き順データは KanjiVG（https://kanjivg.tagaini.net）を使用しています。\n'
-          'KanjiVG © Ulrich Apel, CC BY-SA 3.0',
-        ),
-      ],
     );
   }
 }

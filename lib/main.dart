@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'src/practice_page.dart';
+import 'src/menu_page.dart';
 
 void main() {
   runApp(const KanjiApp());
@@ -27,7 +27,7 @@ class KanjiApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const PracticePage(),
+      home: const MenuPage(),
     );
   }
 }

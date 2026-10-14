@@ -2,7 +2,8 @@
 
 漢字の書き順を 1 画ずつ確認しながら練習できる Flutter Web アプリです。
 
-- 小学 1 年生の漢字 10 字（一 山 川 日 月 木 水 火 右 学）を順番に練習
+- 小学 1 年生（80 字）・2 年生（160 字）・3 年生（200 字）のセットをメニューから選択
+- 1 回 10 問、選んだ学年の漢字からランダムに出題
 - 「次の画」で 1 画ずつ、筆の動きをアニメーションで表示（いまの画は赤）
 - 自動再生、前の画に戻る、最初から、お手本のうすい表示の切り替え
 - キーボード操作: → / Space で次の画、← で前の画
@@ -16,12 +17,21 @@ flutter pub get
 flutter run -d chrome
 ```
 
-## 漢字を追加するには
+## 漢字データの作り直し
 
-1. [KanjiVG](https://github.com/KanjiVG/kanjivg/tree/master/kanji) から、その漢字のコードポイント（5 桁の 16 進数）の SVG（例: 右 → `053f3.svg`）を `assets/kanjivg/` に入れる
-2. `lib/src/kanji_data.dart` の `kanjiList` に追加する
+学年ごとの漢字と読み（`lib/src/kanji_data.dart`）は、常用漢字表の音訓から生成しています。
+足りない KanjiVG の SVG も `assets/kanjivg/` にダウンロードされます。
+
+```sh
+curl -L -o joyo.wiki "https://ja.wikipedia.org/w/index.php?title=常用漢字一覧&action=raw"
+python3 tool/generate_kanji_data.py joyo.wiki
+```
+
+学年を増やすときは、`tool/generate_kanji_data.py` の `GRADES` に追加して実行します。
 
 ## ライセンス
 
 書き順データ（`assets/kanjivg/`）は [KanjiVG](https://kanjivg.tagaini.net) のものです。
 KanjiVG © Ulrich Apel, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
+
+学年別の漢字は学年別漢字配当表（2020 年度施行）、読みは常用漢字表（文化庁）によります。
