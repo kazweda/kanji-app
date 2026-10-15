@@ -25,6 +25,10 @@ const expectedStrokes = {
   '鼻': 14,
   '整': 16,
   '館': 16,
+  '必': 5,
+  '飛': 9,
+  '臓': 19,
+  '議': 20,
 };
 
 /// 書き順データの読み込みが終わるまで待つ。
@@ -51,11 +55,14 @@ void main() {
   // 偽の時間の中で作られた Future は次のテストでは終わらないので、毎回消す。
   setUp(rootBundle.clear);
 
-  test('1〜3 年生の漢字が学年別漢字配当表の字数どおりにある', () {
-    expect([for (final s in kanjiSets) s.grade], [1, 2, 3]);
-    expect([for (final s in kanjiSets) s.entries.length], [80, 160, 200]);
+  test('1〜6 年生の漢字が学年別漢字配当表の字数どおりにある', () {
+    expect([for (final s in kanjiSets) s.grade], [1, 2, 3, 4, 5, 6]);
+    expect(
+      [for (final s in kanjiSets) s.entries.length],
+      [80, 160, 200, 202, 193, 191],
+    );
     final all = [for (final s in kanjiSets) ...s.entries.map((e) => e.kanji)];
-    expect(all.toSet(), hasLength(440));
+    expect(all.toSet(), hasLength(1026));
   });
 
   test('すべての漢字の KanjiVG データを解析でき、読みがある', () {
@@ -83,8 +90,8 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(const KanjiApp());
-    for (final title in ['小学 1 年生セット', '小学 2 年生セット', '小学 3 年生セット']) {
-      expect(find.text(title), findsOneWidget);
+    for (var grade = 1; grade <= 6; grade++) {
+      expect(find.text('小学 $grade 年生セット'), findsOneWidget);
     }
 
     await tester.tap(find.text('小学 2 年生セット'));
