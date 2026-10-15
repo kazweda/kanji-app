@@ -8,6 +8,8 @@
 - 学年ごとの漢字は学年別漢字配当表（2020 年度施行）。常用漢字一覧の学年欄と一致するか確かめる。
 - 読みは常用漢字表の音訓から、括弧付きの特別な読みを除いて音読み・訓読みを数個ずつ取る。
 - assets/kanjivg/ にない SVG は KanjiVG からダウンロードする。
+- メニューに出す字は、アイコンの 1 字を ICONS で手で選び、説明文の 5 字は
+  画数の少ない順（同じ画数なら訓読みの 50 音順）で選ぶ。
 """
 
 import re
@@ -43,6 +45,10 @@ GRADES = {
        "腸潮賃痛敵展討党糖届難乳認納脳派拝背肺俳班晩否批秘俵腹奮並陛閉片補暮宝訪亡忘棒枚幕密盟模"
        "訳郵優預幼欲翌乱卵覧裏律臨朗論",
 }
+
+# メニューで学年のアイコンにする字。訓読みのある物の名前で、画数の少ない字を選んだ。
+ICONS = {1: "山", 2: "丸", 3: "皿", 4: "井", 5: "比", 6: "己"}
+PREVIEW_COUNT = 5
 
 MAX_ON = 2
 MAX_KUN = 3
@@ -104,6 +110,31 @@ def format_readings(readings):
     return "・".join(ons[:MAX_ON] + picked)
 
 
+def stroke_count(kanji):
+    svg = (SVG_DIR / f"{svg_name(kanji)}.svg").read_text(encoding="utf-8")
+    return len(re.findall(r'<path id="kvg:[^"]*-s\d+"', svg))
+
+
+def first_kun(reading):
+    """表示用の読みから最初の訓読みを取り出す（なければ None）。"""
+    for r in reading.split("・"):
+        if re.match(r"[ぁ-ん]", r):
+            return r.replace("(", "").replace(")", "")
+    return None
+
+
+def preview(kanji, readings):
+    """説明文に出す字。画数の少ない順、同じ画数なら訓読みの 50 音順。
+
+    訓読みのない字は同じ画数の中で後ろに回し、最後は配当表の順で決める。
+    """
+    def key(i):
+        kun = first_kun(readings[i])
+        return (stroke_count(kanji[i]), kun is None, kun or "", i)
+
+    return "".join(kanji[i] for i in sorted(range(len(kanji)), key=key)[:PREVIEW_COUNT])
+
+
 def main(wiki_path):
     joyo = parse_joyo(wiki_path)
 
@@ -111,6 +142,8 @@ def main(wiki_path):
         listed = {k for k, (g, _) in joyo.items() if g == str(grade)}
         if set(kanji) != listed or len(kanji) != len(set(kanji)):
             sys.exit(f"{grade} 年生の漢字が常用漢字一覧と一致しません")
+        if ICONS[grade] not in kanji:
+            sys.exit(f"{grade} 年生のアイコンの字 {ICONS[grade]} がその学年にありません")
 
     SVG_DIR.mkdir(parents=True, exist_ok=True)
     for kanji in "".join(GRADES.values()):
@@ -134,10 +167,21 @@ def main(wiki_path):
         "",
         "/// 学年ごとの練習セット。",
         "class KanjiSet {",
-        "  const KanjiSet(this.grade, this.entries);",
+        "  const KanjiSet(",
+        "    this.grade,",
+        "    this.entries, {",
+        "    required this.icon,",
+        "    required this.preview,",
+        "  });",
         "",
         "  final int grade;",
         "  final List<KanjiEntry> entries;",
+        "",
+        "  /// メニューで学年のアイコンにする字。",
+        "  final String icon;",
+        "",
+        "  /// メニューの説明文に出す字（画数の少ない順）。",
+        "  final String preview;",
         "",
         "  String get title => '小学 $grade 年生';",
         "}",
@@ -147,9 +191,13 @@ def main(wiki_path):
         "const kanjiSets = [",
     ]
     for grade, kanji in GRADES.items():
-        lines.append(f"  KanjiSet({grade}, [")
-        for k in kanji:
-            lines.append(f"    KanjiEntry('{k}', '{format_readings(joyo[k][1])}'),")
+        readings = [format_readings(joyo[k][1]) for k in kanji]
+        lines.append(
+            f"  KanjiSet({grade}, icon: '{ICONS[grade]}', "
+            f"preview: '{preview(kanji, readings)}', ["
+        )
+        for k, r in zip(kanji, readings):
+            lines.append(f"    KanjiEntry('{k}', '{r}'),")
         lines.append("  ]),")
     lines.append("];")
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
