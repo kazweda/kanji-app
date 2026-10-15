@@ -1,5 +1,5 @@
 name: kanji_app
-description: "漢字のウェブアプリ"
+description: "漢字の書き順を 1 画ずつ確認しながら練習できるウェブアプリ（小学 1〜6 年生）"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
