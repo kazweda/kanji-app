@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kanji_app/main.dart';
 import 'package:kanji_app/src/kanji_data.dart';
@@ -26,14 +27,30 @@ const expectedStrokes = {
   '館': 16,
 };
 
+/// 書き順データの読み込みが終わるまで待つ。
+///
+/// アセットの読み込みは実時間で進むので、読み込み中の表示が消えるまで
+/// 少しずつ実時間を進める。遅い CI でも待ちきれるよう、上限は長めにとる。
 Future<void> pumpUntilLoaded(WidgetTester tester) async {
-  await tester.runAsync(
-    () => Future.delayed(const Duration(milliseconds: 300)),
-  );
+  final loading = find.byType(CircularProgressIndicator);
+  final deadline = DateTime.now().add(const Duration(seconds: 10));
+  while (loading.evaluate().isNotEmpty) {
+    if (DateTime.now().isAfter(deadline)) {
+      fail('書き順データの読み込みが 10 秒で終わらなかった');
+    }
+    await tester.runAsync(
+      () => Future.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+  }
   await tester.pumpAndSettle();
 }
 
 void main() {
+  // rootBundle は読み込み中の Future をキャッシュする。前のテストの
+  // 偽の時間の中で作られた Future は次のテストでは終わらないので、毎回消す。
+  setUp(rootBundle.clear);
+
   test('1〜3 年生の漢字が学年別漢字配当表の字数どおりにある', () {
     expect([for (final s in kanjiSets) s.grade], [1, 2, 3]);
     expect([for (final s in kanjiSets) s.entries.length], [80, 160, 200]);
@@ -71,7 +88,7 @@ void main() {
     }
 
     await tester.tap(find.text('小学 2 年生セット'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     await pumpUntilLoaded(tester);
 
     final grade2 = kanjiSets[1].entries.map((e) => e.kanji).toSet();
