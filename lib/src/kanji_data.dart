@@ -11,10 +11,21 @@ class KanjiEntry {
 
 /// 学年ごとの練習セット。
 class KanjiSet {
-  const KanjiSet(this.grade, this.entries);
+  const KanjiSet(
+    this.grade,
+    this.entries, {
+    required this.icon,
+    required this.preview,
+  });
 
   final int grade;
   final List<KanjiEntry> entries;
+
+  /// メニューで学年のアイコンにする字。
+  final String icon;
+
+  /// メニューの説明文に出す字（画数の少ない順）。
+  final String preview;
 
   String get title => '小学 $grade 年生';
 }
@@ -22,7 +33,7 @@ class KanjiSet {
 /// 学年別漢字配当表（2020 年度施行）の 1〜6 年生の漢字。
 /// 各文字の SVG は assets/kanjivg/ に同梱している。
 const kanjiSets = [
-  KanjiSet(1, [
+  KanjiSet(1, icon: '山', preview: '一入九力十', [
     KanjiEntry('一', 'イチ・イツ・ひと・ひと(つ)'),
     KanjiEntry('右', 'ウ・ユウ・みぎ'),
     KanjiEntry('雨', 'ウ・あめ'),
@@ -104,7 +115,7 @@ const kanjiSets = [
     KanjiEntry('林', 'リン・はやし'),
     KanjiEntry('六', 'ロク・む・む(つ)・むっ(つ)'),
   ]),
-  KanjiSet(2, [
+  KanjiSet(2, icon: '丸', preview: '刀丸弓工才', [
     KanjiEntry('引', 'イン・ひ(く)・ひ(ける)'),
     KanjiEntry('羽', 'ウ・は・はね'),
     KanjiEntry('雲', 'ウン・くも'),
@@ -266,7 +277,7 @@ const kanjiSets = [
     KanjiEntry('理', 'リ'),
     KanjiEntry('話', 'ワ・はな(す)・はなし'),
   ]),
-  KanjiSet(3, [
+  KanjiSet(3, icon: '皿', preview: '丁反化区予', [
     KanjiEntry('悪', 'アク・オ・わる(い)'),
     KanjiEntry('安', 'アン・やす(い)'),
     KanjiEntry('暗', 'アン・くら(い)'),
@@ -468,7 +479,7 @@ const kanjiSets = [
     KanjiEntry('路', 'ロ・じ'),
     KanjiEntry('和', 'ワ・やわ(らぐ)・やわ(らげる)・なご(む)'),
   ]),
-  KanjiSet(4, [
+  KanjiSet(4, icon: '井', preview: '井氏夫欠不', [
     KanjiEntry('愛', 'アイ'),
     KanjiEntry('案', 'アン'),
     KanjiEntry('以', 'イ'),
@@ -672,7 +683,7 @@ const kanjiSets = [
     KanjiEntry('労', 'ロウ'),
     KanjiEntry('録', 'ロク'),
   ]),
-  KanjiSet(5, [
+  KanjiSet(5, icon: '比', preview: '久士比支仏', [
     KanjiEntry('圧', 'アツ'),
     KanjiEntry('囲', 'イ・かこ(む)・かこ(う)'),
     KanjiEntry('移', 'イ・うつ(る)・うつ(す)'),
@@ -867,7 +878,7 @@ const kanjiSets = [
     KanjiEntry('領', 'リョウ'),
     KanjiEntry('歴', 'レキ'),
   ]),
-  KanjiSet(6, [
+  KanjiSet(6, icon: '己', preview: '己亡干寸収', [
     KanjiEntry('胃', 'イ'),
     KanjiEntry('異', 'イ・こと'),
     KanjiEntry('遺', 'イ'),

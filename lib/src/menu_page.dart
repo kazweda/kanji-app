@@ -51,14 +51,14 @@ class MenuPage extends StatelessWidget {
                       ),
                       leading: CircleAvatar(
                         child: Text(
-                          set.entries.first.kanji,
+                          set.icon,
                           style: theme.textTheme.titleLarge,
                         ),
                       ),
                       title: Text('${set.title}セット'),
                       subtitle: Text(
                         '${set.entries.length} 字　'
-                        '${set.entries.take(5).map((e) => e.kanji).join(' ')} …',
+                        '${set.preview.split('').join(' ')} …',
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(context).push(

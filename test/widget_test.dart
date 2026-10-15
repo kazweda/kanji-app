@@ -79,6 +79,19 @@ void main() {
     }
   });
 
+  test('メニューのアイコンと説明文の字は、その学年の字', () {
+    for (final set in kanjiSets) {
+      final kanji = set.entries.map((e) => e.kanji).toSet();
+      expect(kanji, contains(set.icon), reason: '${set.grade} 年生');
+      expect(set.preview.split(''), hasLength(5), reason: '${set.grade} 年生');
+      expect(
+        kanji.containsAll(set.preview.split('')),
+        isTrue,
+        reason: '${set.grade} 年生',
+      );
+    }
+  });
+
   test('アセットのファイル名はコードポイントの 5 桁 16 進数', () {
     expect(KanjiStrokes.assetPathFor('右'), 'assets/kanjivg/053f3.svg');
   });
@@ -128,7 +141,12 @@ void main() {
 
     final longest = kanjiSets.expand((s) => s.entries).toList()
       ..sort((a, b) => b.reading.length.compareTo(a.reading.length));
-    final set = KanjiSet(0, longest.take(questionsPerRound).toList());
+    final set = KanjiSet(
+      0,
+      icon: longest.first.kanji,
+      preview: '',
+      longest.take(questionsPerRound).toList(),
+    );
 
     await tester.pumpWidget(MaterialApp(home: PracticePage(kanjiSet: set)));
     await pumpUntilLoaded(tester);
